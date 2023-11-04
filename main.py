@@ -26,13 +26,16 @@ connected = True
 # Inicializar el puerto serial
 use_serial = False
 if use_serial:
-    ser = serial.Serial('COM6', 9600)
+    ser = serial.Serial('COM12', 9600)
+    time.sleep(3)
+    data = "0"
+    ser.write(data.encode())
 
 # Inicializar mediapipe para la detección facial
 mpDibujo = np.solutions.drawing_utils
 ConfDibu = mpDibujo.DrawingSpec(thickness=1, circle_radius=1)
 mpMallaFacial = np.solutions.face_mesh
-MallaFacial = mpMallaFacial.FaceMesh(max_num_faces=1)
+MallaFacial = mpMallaFacial.FaceMesh(max_num_faces=6)
 
 
 def throw_alert():
@@ -41,28 +44,22 @@ def throw_alert():
     message = ""
     if conteo_sue == 1:
         playsound(os.path.join(os.path.dirname(__file__), 'audio.mp3'), True)
-        message = "alert-1"
+        message = "1"
     elif conteo_sue == 2:
         playsound(os.path.join(os.path.dirname(__file__), 'audio2.mp3'), True)
-        message = "alert-2"
+        message = "1"
     elif conteo_sue == 3:
         playsound(os.path.join(os.path.dirname(__file__), 'audio3.mp3'), True)
-        message = "stop"
+        message = "1"
 
     if use_serial:
         ser.write(message.encode())
 
 
 def detector_thread():
-    global conteo_sue
-    global counting
-    global connected
+    global conteo_sue, counting, connected
 
     while True:
-        if use_serial:
-            data = ser.readline()
-            print(data.decode('utf-8').strip())
-
         actual_time = 0
         while counting:
             time.sleep(1)
@@ -134,26 +131,14 @@ while True:
                                 3)
 
                     if longitud1 <= 10 and longitud2 <= 10 and parpadeo == False:
-                        conteo += 1
-                        # parpadeo = True
+                        parpadeo = True
                         counting = True
-                        # inicio = time.time()
 
                     elif longitud1 > 10 and longitud2 > 10 and parpadeo == True:
-                        # parpadeo = False
+                        conteo += 1
+                        parpadeo = False
                         counting = False
-                        # final = time.time()
 
-                    # Temporizador
-                    # tiempo = round(final - inicio, 0)
-                    """
-                    if tiempo >= 3:
-                        # TODO: EN ESTE LUGAR SE DETECTA EL MICROSUEÑO
-                        conteo_sue += 1
-                        muestra = tiempo
-                        inicio = 0
-                        final = 0
-                    """
     else:
         parpadeo = False
         counting = False
